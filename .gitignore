@@ -26,3 +26,5 @@ dist/
 
 # Common backup files
 *.bak
+
+bin
