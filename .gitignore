@@ -13,3 +13,16 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
+
+dist/
+
+.DS_Store
+
+# VIM
+.*.swp
+
+# Emacs
+*~
+
+# Common backup files
+*.bak
