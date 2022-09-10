@@ -16,6 +16,7 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	sf "github.com/snowflakedb/gosnowflake"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 var (
@@ -88,13 +89,22 @@ func main() {
 		log.Fatalf("-source is required")
 	}
 
-	zc := zap.NewProductionConfig()
-	zc.Level = zap.NewAtomicLevelAt(zap.DebugLevel)
-	zc.DisableStacktrace = true
-	zapLog, err := zc.Build()
-	if err != nil {
-		panic("Cannot initialize Zap logger")
-	}
+	zc := zap.NewProductionEncoderConfig()
+	highPriority := zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
+		return lvl >= zapcore.ErrorLevel
+	})
+	lowPriority := zap.LevelEnablerFunc(func(lvl zapcore.Level) bool {
+		return lvl < zapcore.ErrorLevel
+	})
+	consoleDebugging := zapcore.Lock(os.Stdout)
+	consoleErrors := zapcore.Lock(os.Stderr)
+	consoleEncoder := zapcore.NewJSONEncoder(zc)
+	core := zapcore.NewTee(
+		zapcore.NewCore(consoleEncoder, consoleErrors, highPriority),
+		zapcore.NewCore(consoleEncoder, consoleDebugging, lowPriority),
+	)
+	zapLog := zap.New(core)
+
 	logger = zapr.NewLogger(zapLog)
 	if err := run(context.Background()); err != nil {
 		logger.Error(err, "Failed to migrate database")
