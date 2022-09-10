@@ -13,6 +13,7 @@ import (
 	"github.com/go-logr/zapr"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/snowflake"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	sf "github.com/snowflakedb/gosnowflake"
 	"go.uber.org/zap"
 )
@@ -77,7 +78,7 @@ func run(ctx context.Context) error {
 }
 
 func main() {
-	flag.StringVar(&source, "source", "", "Source for migrations")
+	flag.StringVar(&source, "source", "", "Source for migrations (only file://... supported)")
 	flag.StringVar(&database, "database", "", "Database to migrate")
 	flag.StringVar(&schema, "schema", "", "Schema to migrate")
 	flag.StringVar(&warehouse, "warehouse", "", "Warehouse to use for queries")
